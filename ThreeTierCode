@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+
+    environment {
+        // Define environment variables if needed
+        NODE_HOME = tool 'NodeJS' // Assuming you have a NodeJS tool configured in Jenkins
+        PATH = "${NODE_HOME}/bin:${PATH}"
+    }
+
+    stages {
+        stage('Front End Build') {
+            steps {
+                script {
+                    // Front End Build Script (e.g., npm install and npm build)
+                    dir('frontend') {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
+                }
+            }
+        }
+
+        stage('Back End Build') {
+            steps {
+                script {
+                    // Back End Build Script (e.g., npm install for Node.js or mvn clean install for Java)
+                    dir('backend') {
+                        sh 'npm install'
+                        // Additional steps as needed
+                    }
+                }
+            }
+        }
+
+        stage('Database Setup') {
+            steps {
+                script {
+                    // Database Setup Script (e.g., run database migrations or seed data)
+                    dir('database') {
+                        sh 'psql -h localhost -U postgres -d mydatabase -f init.sql'
+                        // Additional steps as needed
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Deployment Script (e.g., start your application server)
+                    dir('backend') {
+                        sh 'node server.js'
+                        // Additional steps as needed
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+            // Additional success actions if needed
+        }
+        failure {
+            echo 'Pipeline failed. Please check logs for details.'
+            // Additional failure actions if needed
+        }
+    }
+}
